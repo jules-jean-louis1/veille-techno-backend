@@ -14,8 +14,6 @@ public class UserList {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
     @Enumerated(EnumType.ORDINAL)
     private UserListRole role;
     @ManyToOne(optional = false)

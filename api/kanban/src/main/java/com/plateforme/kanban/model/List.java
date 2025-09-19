@@ -80,4 +80,9 @@ public class List {
     public void setUpdatedDate(Instant updatedDate) {
         this.updatedDate = updatedDate;
     }
+
+    public boolean isPresent() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'isPresent'");
+    }
 }

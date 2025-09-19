@@ -1,7 +1,7 @@
 package com.plateforme.kanban.model;
 
 public enum UserListRole {
-    ADMIN,
+    OWNER,
     EDITOR,
     VIEWER
 }
