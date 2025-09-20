@@ -1,43 +1,46 @@
 package com.plateforme.kanban.controller;
 
-import java.time.Instant;
+import com.plateforme.kanban.dtos.LoginRequest;
+import com.plateforme.kanban.dtos.LoginResponse;
+import com.plateforme.kanban.model.User;
+import com.plateforme.kanban.service.AuthService;
+import com.plateforme.kanban.service.JwtService;
 
-import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.plateforme.kanban.model.User;
-import com.plateforme.kanban.service.AuthService;
-
-import io.swagger.v3.core.util.Json;
 
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
     private final AuthService authService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, AuthenticationManager authenticationManager, JwtService jwtService) {
         this.authService = authService;
+        this.authenticationManager = authenticationManager;
+        this.jwtService = jwtService;
     }
 
-    @PostMapping(value = "/register", produces = MediaType.APPLICATION_JSON_VALUE)
-    public User register(@RequestBody User user) {
-        String email = user.getEmail();
-        String password = user.getPassword();
-        String firstName = user.getFirstName();
-        String lastName = user.getLastName();
-        if (email == null || email.isEmpty() || password == null || password.isEmpty()) {
-            throw new IllegalArgumentException(Json.pretty("Email and password must not be empty"));
-        }
-        user.setFirstName(firstName == null || firstName.isEmpty() ? "" : firstName);
-        user.setLastName(lastName == null || lastName.isEmpty() ? "" : lastName);
-        user.setCreatedAt(Instant.now());
-        user.setUpdatedAt(Instant.now());
-        User newUser = authService.create(user);
+    @PostMapping("/register")
+    public ResponseEntity<User> register(@RequestBody User user) {
+        User createdUser = authService.create(user);
+        return ResponseEntity.ok(createdUser);
+    }
 
-        return newUser;
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+        authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+        );
+        final User user = (User) authService.loadUserByUsername(request.getEmail());
+        final String token = jwtService.generateToken(user);
+        return ResponseEntity.ok(new LoginResponse(token));
     }
 }

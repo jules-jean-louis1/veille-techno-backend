@@ -2,13 +2,14 @@ package com.plateforme.kanban.model;
 
 import org.springframework.data.annotation.CreatedBy;
 
+import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+
 import java.time.Instant;
-import jakarta.persistence.Entity;
 
 @Entity
 public class Task {
@@ -17,16 +18,19 @@ public class Task {
     private Long id;
     private String name;
     private String description;
+    private Instant createdAt;
+    private Instant updatedAt;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "list_id", nullable = false)
     private List list;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
     @CreatedBy
     private User user;
     @ManyToOne(optional = true)
     @JoinColumn(name = "assigned_to", nullable = true)
     private User assignedTo;
-    private Instant createdAt;
-    private Instant updatedAt;
 
     public Task() {
     }

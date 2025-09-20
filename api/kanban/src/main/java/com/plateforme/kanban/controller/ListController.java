@@ -1,5 +1,6 @@
 package com.plateforme.kanban.controller;
 
+import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 import com.plateforme.kanban.model.List;
@@ -60,6 +61,7 @@ public class ListController {
 
         // Set the authenticated user as the owner
         list.setUser(currentUser);
+        list.setCreatedDate(Instant.now());
         List newList = listRepository.save(list);
 
         // Create the link in UserList table

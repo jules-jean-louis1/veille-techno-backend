@@ -28,28 +28,12 @@ if ! test -f "$script_file"; then
     exit 1
 fi
 
-prestart_file="backend/prestart.sh"
-if ! [ -x "$prestart_file" ]; then 
-    chmod +x ${prestart_file}
-fi
-
 env_file="docker/.env"
 if ! test -f "$env_file"; then
     echo "$env_file file doesn't not exists. Create it from docker/.env.tpl. (customize if necessary)"
     exit 1
 fi
 
-source docker/.env;
-if [ $1 = "up" ]; then
-    cd docker
-    if ! test -d "$CUSTOM_PATH"; then
-        cp -r custom.sample "$CUSTOM_PATH"
-        echo "The custom dir was created on $CUSTOM_PATH"
-    else
-        rsync -av --ignore-existing custom.sample/static/ "$CUSTOM_PATH/static/"
-    fi
-    cd ../
-fi
 
 launch_compose="docker-compose"
 if ! command -v ${launch_compose} &> /dev/null

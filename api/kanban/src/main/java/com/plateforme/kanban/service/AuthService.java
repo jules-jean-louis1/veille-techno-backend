@@ -1,37 +1,39 @@
 package com.plateforme.kanban.service;
 
-import java.util.ArrayList;
+import java.time.Instant;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 import com.plateforme.kanban.model.User;
 import com.plateforme.kanban.repository.UserRepository;
-
+@Service
 public class AuthService implements UserDetailsService {
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
     @Autowired
-    private UserRepository userRepository;
-    private PasswordEncoder passwordEncoder;
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        return new org.springframework.security.core.userdetails.User(
-            user.getEmail(), user.getPassword(), new ArrayList<>()
-        );
+        return userRepository.findByEmail(email)
+            .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
     }
 
     public User create(User user) {
-        // Optionnel : vérifier si l'email existe déjà
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new RuntimeException("Email already exists");
         }
-        // Ici tu peux aussi hasher le mot de passe si besoin
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setCreatedAt(Instant.now());
         return userRepository.save(user);
     }
 }

@@ -1,6 +1,9 @@
 package com.plateforme.kanban.model;
 
+import jakarta.persistence.Table;
+
 import java.time.Instant;
+import java.util.Set;
 
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -9,22 +12,30 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 
 @Entity
+@Table(name = "lists") // Renomme la table pour éviter les conflits avec le mot-clé SQL "LIST"
 public class List {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String name;
     private String description;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
     @CreatedBy
     private User user;
+
     @CreatedDate
     private Instant createdDate;
     private Instant updatedDate;
+
     @OneToMany(mappedBy = "list")
-    private Task[] tasks;
+    private Set<Task> tasks;
 
     public List() {
     }
@@ -53,11 +64,11 @@ public class List {
         return user;
     }
 
-    public Task[] getTasks() {
+    public Set<Task> getTasks() {
         return tasks;
     }
 
-    public void setTasks(Task[] tasks) {
+    public void setTasks(Set<Task> tasks) {
         this.tasks = tasks;
     }
 
@@ -79,10 +90,5 @@ public class List {
 
     public void setUpdatedDate(Instant updatedDate) {
         this.updatedDate = updatedDate;
-    }
-
-    public boolean isPresent() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'isPresent'");
     }
 }
