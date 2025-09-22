@@ -2,6 +2,8 @@ package com.plateforme.kanban.controller;
 
 import com.plateforme.kanban.dtos.LoginRequest;
 import com.plateforme.kanban.dtos.LoginResponse;
+import com.plateforme.kanban.dtos.RegisterDto;
+import com.plateforme.kanban.dtos.RegisterResponse;
 import com.plateforme.kanban.model.User;
 import com.plateforme.kanban.service.AuthService;
 import com.plateforme.kanban.service.JwtService;
@@ -29,9 +31,9 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<User> register(@RequestBody User user) {
-        User createdUser = authService.create(user);
-        return ResponseEntity.ok(createdUser);
+    public ResponseEntity<RegisterResponse> register(@RequestBody RegisterDto request) {
+        User createdUser = authService.create(request);
+        return ResponseEntity.ok(new RegisterResponse(createdUser));
     }
 
     @PostMapping("/login")

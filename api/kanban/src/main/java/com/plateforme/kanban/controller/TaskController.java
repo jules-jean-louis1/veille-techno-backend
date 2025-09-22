@@ -19,7 +19,7 @@ import com.plateforme.kanban.model.User;
 import com.plateforme.kanban.repository.TaskRepository;
 
 @RestController
-@RequestMapping("/api/v1/tasks")
+@RequestMapping("/api/v1/task")
 public class TaskController {
     private final TaskRepository taskRepository;
 
@@ -34,7 +34,7 @@ public class TaskController {
             throw new IllegalStateException("User must be authenticated to create a task.");
         }
         if (task.getName() == null || task.getName().isEmpty()) {
-            throw new IllegalStateException("Task name cannot be empty.");
+            throw new IllegalStateException("Task title cannot be empty.");
         }
         if (task.getList() == null || task.getList().getId() == null) {
             throw new IllegalStateException("Task must be associated with a list.");

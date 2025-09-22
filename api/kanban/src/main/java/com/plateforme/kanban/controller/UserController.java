@@ -32,7 +32,7 @@ public class UserController {
     @PostMapping
     public ResponseEntity<User> createUser(@RequestBody User user) {
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            return ResponseEntity.badRequest().build(); // Email already exists
+            return ResponseEntity.badRequest().build();
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setCreatedAt(Instant.now());
@@ -59,9 +59,8 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<User> getCurrentUser(@AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
-            return ResponseEntity.status(401).build(); // Unauthorized
+            return ResponseEntity.status(401).build();
         }
-        // Re-fetch user from DB to get the latest state
         return userRepository.findById(currentUser.getId())
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -71,7 +70,7 @@ public class UserController {
     @PutMapping("/{id}")
     public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User userDetails, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null || !currentUser.getId().equals(id)) {
-            return ResponseEntity.status(403).build(); // Forbidden
+            return ResponseEntity.status(403).build();
         }
 
         return userRepository.findById(id)

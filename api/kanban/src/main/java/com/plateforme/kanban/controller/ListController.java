@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -92,4 +93,31 @@ public class ListController {
         }
     }
 
+    @PutMapping("/list/{id}")
+    public ResponseEntity<List> update(@PathVariable Long id, @RequestBody Map<String, String> payload,
+            @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return ResponseEntity.status(403).build();
+        }
+
+        Optional<List> listOptional = listRepository.findById(id);
+        if (listOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        List list = listOptional.get();
+        // Vérifie si l'utilisateur authentifié est bien le propriétaire de la liste
+        if (!list.getUser().getId().equals(currentUser.getId())) {
+            return ResponseEntity.status(403).build(); // Interdit
+        }
+
+        String newName = payload.get("name");
+        if (newName != null && !newName.isEmpty()) {
+            list.setName(newName);
+            List updatedList = listRepository.save(list);
+            return ResponseEntity.ok(updatedList);
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }
