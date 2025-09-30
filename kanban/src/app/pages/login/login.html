@@ -1,0 +1,7 @@
+<p>Bienvenue!</p>
+<ng-container [ngSwitch]="showForm">
+    <app-login-form *ngSwitchCase="'login'"></app-login-form>
+    <app-register-form  *ngSwitchCase="'register'"></app-register-form>
+</ng-container>
+  <button type="button" (click)="displayedForm()">Click</button>
+
