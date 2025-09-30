@@ -13,11 +13,7 @@ import { CommonModule } from '@angular/common';
 export class Login {
   public showForm: 'login' | 'register' = 'login';
 
-  displayedForm() {
-    if (this.showForm === 'login') {
-      this.showForm = 'register';
-    } else {
-      this.showForm = 'login';
-    }
+  toggleForm() {
+    this.showForm = this.showForm === 'login' ? 'register' : 'login';
   }
 }
