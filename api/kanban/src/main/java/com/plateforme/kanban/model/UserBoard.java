@@ -1,5 +1,6 @@
 package com.plateforme.kanban.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,9 +25,11 @@ public class UserBoard {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference("user-userboard")
     private User user;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "board_id", nullable = false)
+    @JsonBackReference("board-userboard")
     private Board board;
 }

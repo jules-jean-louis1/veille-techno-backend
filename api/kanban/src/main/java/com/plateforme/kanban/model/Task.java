@@ -32,6 +32,9 @@ public class Task {
     @JoinColumn(name = "assigned_to", nullable = true)
     private User assignedTo;
 
+    private StatusTask status;
+    private PriorityTask priority;
+
     public Task() {
     }
 
@@ -67,6 +70,14 @@ public class Task {
         return updatedAt;
     }
 
+    public StatusTask getStatusTask() {
+        return status;
+    }
+
+    public PriorityTask getPriorityTask() {
+        return priority;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -93,5 +104,13 @@ public class Task {
 
     public void setUpdatedAt(Instant updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public void setStatusTask(StatusTask status) {
+        this.status = status;
+    }
+
+    public void setPriorityTask(PriorityTask priority) {
+        this.priority = priority;
     }
 }

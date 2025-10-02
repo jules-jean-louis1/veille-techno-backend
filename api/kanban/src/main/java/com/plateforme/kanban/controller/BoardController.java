@@ -4,9 +4,13 @@ import com.plateforme.kanban.model.Board;
 import com.plateforme.kanban.model.User;
 import com.plateforme.kanban.model.UserBoard;
 import com.plateforme.kanban.model.UserBoardRole;
+import com.plateforme.kanban.repository.BoardRepository;
 import com.plateforme.kanban.repository.UserRepository;
 import com.plateforme.kanban.service.BoardService;
+import com.plateforme.kanban.specifications.BoardSpecifications;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -16,19 +20,22 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/boards")
+@RequestMapping("/api/v1/boards")
 public class BoardController {
 
     @Autowired
     private BoardService boardService;
 
     @Autowired
+    private BoardRepository boardRepository;
+
+    @Autowired
     private UserRepository userRepository;
 
-
     @GetMapping
-    public ResponseEntity<List<Board>> getAllBoards() {
-        return new ResponseEntity<>(boardService.allBoards(), HttpStatus.OK);
+    public ResponseEntity<List<Board>> getAllBoards(@RequestParam(required = false) Long boardId,@RequestParam(required = false) Long userId) {
+        Specification<Board> spec = BoardSpecifications.withDynamicQuery(boardId, userId);
+        return new ResponseEntity<>(boardRepository.findAll(spec), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
@@ -48,7 +55,8 @@ public class BoardController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Board> updateBoard(@PathVariable Long id, @RequestBody Board boardDetails, @AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<Board> updateBoard(@PathVariable Long id, @RequestBody Board boardDetails,
+            @AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
@@ -70,7 +78,8 @@ public class BoardController {
     }
 
     @PostMapping("/{boardId}/users")
-    public ResponseEntity<UserBoard> addUserToBoard(@PathVariable Long boardId, @RequestBody Map<String, String> payload, @AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<UserBoard> addUserToBoard(@PathVariable Long boardId,
+            @RequestBody Map<String, String> payload, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }

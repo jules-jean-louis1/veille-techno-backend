@@ -1,5 +1,6 @@
 package com.plateforme.kanban.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,6 +38,7 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @lombok.Builder.Default
+    @JsonManagedReference("user-userboard")
     private List<UserBoard> userBoards = new ArrayList<>();
 
     @Override
