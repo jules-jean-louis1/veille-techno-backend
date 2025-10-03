@@ -36,4 +36,9 @@ export class TaskService {
       })
     );
   }
+
+  update(taskId: any, task: any): Observable<any> {
+    const headers = { Authorization: `Bearer ${this.token}` };
+    return this.http.put<any>(`${this.apiUrl}/${taskId}`, task, { headers });
+  }
 }

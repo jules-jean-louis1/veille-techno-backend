@@ -10,9 +10,10 @@ import { TaskService } from '../../../_services/task/task.service';
 })
 export class TaskFormComponent {
   @Input() listId!: number;
-  @Output() taskCreated = new EventEmitter<any>(); // Émetteur d'événement
+  @Output() taskCreated = new EventEmitter<any>();
   private taskService = inject(TaskService);
   public showForm: boolean = false;
+  
   name = '';
   description = '';
 

@@ -1,5 +1,19 @@
 <div class="task-card">
-  <h3>{{ task.name }}</h3>
-  <p>{{ task.description }}</p>
-  <button type="button" (click)="deleteTask()">Sup</button>
+  @if (!isEditing) {
+  <div>
+    <h3>{{ task.name }}</h3>
+    <p>{{ task.description }}</p>
+    <button type="button" (click)="deleteTask()">Sup</button>
+    <button type="button" (click)="toggleEdit()">Edit</button>
+  </div>
+
+  } @else if (isEditing) {
+
+  <div>
+    <input [(ngModel)]="task.name" placeholder="Nom de la tâche" />
+    <textarea [(ngModel)]="task.description" placeholder="Description"></textarea>
+    <button type="button" (click)="saveTask()">Save</button>
+    <button type="button" (click)="toggleEdit()">Cancel</button>
+  </div>
+  }
 </div>
