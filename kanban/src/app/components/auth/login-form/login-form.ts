@@ -25,8 +25,10 @@ export class LoginForm {
     this.authService.login(this.email, this.password).subscribe({
       next: () => {
         console.log('logged');
-        this.getLoggedUser();
-        this.router.navigateByUrl('/');
+        if (localStorage.getItem('auth_token')) {
+          this.getLoggedUser();
+          this.router.navigateByUrl('/');
+        }
       },
       error: (error: HttpErrorResponse) => {
         console.error('log failed');

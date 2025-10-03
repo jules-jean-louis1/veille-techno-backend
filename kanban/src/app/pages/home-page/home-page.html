@@ -1,1 +1,10 @@
 <app-board-dialog-button></app-board-dialog-button>
+
+<div *ngIf="boards$ | async as boards">
+  <ul *ngIf="boards.length > 0">
+    <li *ngFor="let board of boards">
+      <app-board-card [boardData]="board"></app-board-card>
+    </li>
+  </ul>
+  <p *ngIf="boards.length === 0">Aucun board à afficher.</p>
+</div>

@@ -3,6 +3,8 @@ package com.plateforme.kanban.controller;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.plateforme.kanban.dto.TaskDTO;
 import com.plateforme.kanban.model.Task;
 import com.plateforme.kanban.model.User;
 import com.plateforme.kanban.repository.TaskRepository;
@@ -29,22 +33,26 @@ public class TaskController {
 
     // CREATE
     @PostMapping
-    public Task create(@RequestBody Task task, @AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<TaskDTO> create(@RequestBody Task task, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
-            throw new IllegalStateException("User must be authenticated to create a task.");
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        if (task.getName() == null || task.getName().isEmpty()) {
-            throw new IllegalStateException("Task title cannot be empty.");
-        }
-        if (task.getList() == null || task.getList().getId() == null) {
-            throw new IllegalStateException("Task must be associated with a list.");
-        }
-
         task.setUser(currentUser);
         task.setCreatedAt(Instant.now());
         task.setUpdatedAt(Instant.now());
 
-        return taskRepository.save(task);
+        taskRepository.save(task);
+
+        // Convertir la tâche créée en TaskDTO
+        TaskDTO createdTaskDTO = new TaskDTO(
+            task.getId(),
+            task.getName(),
+            task.getDescription(),
+            task.getCreatedAt(),
+            task.getUpdatedAt(),
+            task.getList() != null ? task.getList().getId() : null // Inclure l'ID de la liste
+        );
+        return new ResponseEntity<>(createdTaskDTO, HttpStatus.CREATED);
     }
 
     // READ (recherche dynamique)
@@ -71,7 +79,7 @@ public class TaskController {
     @PutMapping("/{id}")
     public ResponseEntity<Task> updateTask(@PathVariable Long id, @RequestBody Task taskDetails,
             @AuthenticationPrincipal User currentUser) {
-        
+
         // 1. Chercher la tâche
         Optional<Task> optionalTask = taskRepository.findById(id);
         if (!optionalTask.isPresent()) {

@@ -1,17 +1,19 @@
-<form (ngSubmit)="onSubmit()">
-  <h2 mat-dialog-title>Créer un tableau</h2>
+<h2 mat-dialog-title>{{ mode === 'edit' ? 'Modifier' : 'Créer' }} un tableau</h2>
+<form>
   <mat-dialog-content>
     <mat-form-field>
       <mat-label>Titre du tableau</mat-label>
-      <input matInput [(ngModel)]="name" name="name" placeholder="Nom" required />
+      <input matInput [(ngModel)]="data.name" name="name" placeholder="Nom" required />
     </mat-form-field>
     <mat-form-field>
       <mat-label>Description du tableau</mat-label>
-      <input matInput [(ngModel)]="description" name="description" placeholder="description" />
+      <input matInput [(ngModel)]="data.description" name="description" placeholder="description" />
     </mat-form-field>
   </mat-dialog-content>
   <mat-dialog-actions>
     <button mat-button (click)="onNoClick()">Annuler</button>
-    <button mat-raised-button color="primary" type="submit" [disabled]="!name">Créer</button>
+    <button mat-raised-button color="primary" (click)="save()">
+      {{ mode === 'edit' ? 'Enregistrer' : 'Créer' }}
+    </button>
   </mat-dialog-actions>
 </form>

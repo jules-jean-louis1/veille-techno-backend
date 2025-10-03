@@ -1,1 +1,7 @@
-<p>list works!</p>
+<div>
+  <p>{{ list.name }}</p>
+  <app-task-form [listId]="list.id" (taskCreated)="addTaskToList($event)"></app-task-form>
+  <div *ngFor="let task of tasks; trackBy: trackByTaskId">
+    <app-task-card [task]="task" (taskDeleted)="deleteTaskFromList($event)"></app-task-card>
+  </div>
+</div>

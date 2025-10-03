@@ -1,2 +1,17 @@
-<button type="button" (click)="toogleBoardForm()">Ajouter Tableau</button>
-<app-board-form></app-board-form>
+<app-list-form [id]="id"></app-list-form>
+<ul class="horizontal-list">
+@if (boards$ | async; as boards) {
+
+  @if (boards.length > 0) {
+    
+    @for (list of boards[0].lists; track list.id) {
+      <li>
+        <app-list [list]="list"></app-list>
+      </li>
+    }
+  }
+} @else {
+  <p>Chargement du board...</p>
+}
+  
+</ul>

@@ -1,0 +1,8 @@
+<a (click)="navigate(boardData.id)">
+  <div>
+    <p>{{ boardData.name }}</p>
+    <p>{{ boardData.description }}</p>
+    <button mat-raised-button color="primary" (click)="editBoard()">Modifier</button>
+    <button mat-raised-button color="warn" (click)="deleteBoard()">Supprimer</button>
+  </div>
+</a>

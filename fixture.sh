@@ -76,7 +76,16 @@ curl -X POST http://localhost:8080/api/v1/task \
   },
   "status": "IN_PROGRESS",
 }'
-
+curl -X POST http://localhost:8080/api/v1/task \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0LmRldkBleGFtcGxlLmNvbSIsImlhdCI6MTc1OTQ1MDIyOSwiZXhwIjoxNzU5NTM2NjI5fQ.3bjzaDJdFawzoyz48_bSUfIOIGVZF_2znidscRLHxDM" \
+-d '{
+  "list": {
+    "id": 52
+  },
+  "name": "t1",
+  "description": "Description de la tâche"
+}'
 # # --- Liste ---
 # echo "--- Suppression de la liste ---"
 # curl -X DELETE http://localhost:8080/api/v1/list/$LIST_ID \

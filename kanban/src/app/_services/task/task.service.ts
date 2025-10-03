@@ -1,8 +1,39 @@
-import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class TaskService {
-  
+  private apiUrl = 'http://localhost:8080/api/v1/task';
+  private http = inject(HttpClient);
+  private token: string | null = null;
+  private tasksSubject = new BehaviorSubject<any[]>([]);
+  tasks$ = this.tasksSubject.asObservable();
+
+  constructor() {
+    if (typeof window !== 'undefined') {
+      this.token = localStorage.getItem('auth_token');
+    }
+  }
+
+  create(task: any): Observable<any> {
+    const headers = { Authorization: `Bearer ${this.token}` };
+    return this.http.post<any>(`${this.apiUrl}`, task, { headers }).pipe(
+      tap((newTask) => {
+        const currentTasks = this.tasksSubject.getValue();
+        this.tasksSubject.next([...currentTasks, newTask]);
+      })
+    );
+  }
+
+  delete(taskId: any): Observable<any> {
+    const headers = { Authorization: `Bearer ${this.token}` };
+    return this.http.delete<any>(`${this.apiUrl}/${taskId}`, { headers }).pipe(
+      tap((response) => {
+        return response;
+      })
+    );
+  }
 }

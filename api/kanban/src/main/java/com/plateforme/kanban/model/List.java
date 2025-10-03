@@ -1,6 +1,7 @@
 package com.plateforme.kanban.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -34,5 +35,6 @@ public class List {
     private Instant updatedDate;
 
     @OneToMany(mappedBy = "list", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("list-task") // Prevent infinite recursion by managing the reference
     private Set<Task> tasks;
 }
