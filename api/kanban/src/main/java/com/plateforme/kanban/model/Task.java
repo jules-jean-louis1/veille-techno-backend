@@ -2,6 +2,8 @@ package com.plateforme.kanban.model;
 
 import org.springframework.data.annotation.CreatedBy;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,6 +25,7 @@ public class Task {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "list_id", nullable = false)
+    @JsonBackReference("list-task") // Référence inverse pour éviter les boucles infinies
     private List list;
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -31,6 +34,9 @@ public class Task {
     @ManyToOne(optional = true)
     @JoinColumn(name = "assigned_to", nullable = true)
     private User assignedTo;
+
+    private StatusTask status;
+    private PriorityTask priority;
 
     public Task() {
     }
@@ -67,6 +73,14 @@ public class Task {
         return updatedAt;
     }
 
+    public StatusTask getStatusTask() {
+        return status;
+    }
+
+    public PriorityTask getPriorityTask() {
+        return priority;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -93,5 +107,13 @@ public class Task {
 
     public void setUpdatedAt(Instant updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public void setStatusTask(StatusTask status) {
+        this.status = status;
+    }
+
+    public void setPriorityTask(PriorityTask priority) {
+        this.priority = priority;
     }
 }

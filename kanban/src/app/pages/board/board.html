@@ -1,0 +1,20 @@
+@if (boards$ | async; as boards) {
+  @if (boards.length > 0) {
+    <h2>{{ boards[0].name }}</h2>
+  }
+}
+
+<ul class="horizontal-list">
+  @if (boards$ | async; as boards) {
+    @if (boards.length > 0) {
+      @for (list of boards[0].lists; track list.id) {
+        <li>
+          <app-list [list]="list"></app-list>
+        </li>
+      }
+    }
+  } @else {
+    <p>Chargement du board...</p>
+  }
+  <app-list-form [id]="id" (listCreated)="addListToBoard($event)"></app-list-form>
+</ul>

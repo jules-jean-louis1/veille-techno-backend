@@ -1,0 +1,26 @@
+<div class="task-card">
+  @if (!isEditing) {
+  <div class="task-card-display">
+    <h3 class="task-card-title">{{ task.name }}</h3>
+    <p class="task-card-description">{{ task.description }}</p>
+    <div class="task-card-footer">
+      <button type="button" (click)="deleteTask()">Supprimer</button>
+      <button type="button" (click)="toggleEdit()">Modifier</button>
+    </div>
+  </div>
+  } @if (isEditing) {
+  <div class="task-card-edit-form">
+    <input [(ngModel)]="task.name" placeholder="Nom de la tâche" />
+    <textarea [(ngModel)]="task.description" placeholder="Description"></textarea>
+    <select [(ngModel)]="task.listId">
+      @for (list of lists; track list.id) {
+      <option [value]="list.id">{{ list.name }}</option>
+      }
+    </select>
+    <div class="task-card-footer">
+      <button type="button" (click)="saveTask()">Enregistrer</button>
+      <button type="button" (click)="toggleEdit()">Annuler</button>
+    </div>
+  </div>
+  }
+</div>

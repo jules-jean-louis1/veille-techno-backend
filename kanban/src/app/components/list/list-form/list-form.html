@@ -1,0 +1,12 @@
+<div>
+  @switch(showForm) { @case (false) {
+  <button type="button" (click)="toggleForm()">Ajouter une liste</button>
+  } @case (true) {
+  <form (ngSubmit)="onSubmit()">
+    <input [(ngModel)]="name" name="name" placeholder="Nom" required />
+    <input [(ngModel)]="description" name="description" placeholder="description" />
+    <button type="submit">+Board</button>
+    <button type="button" (click)="toggleForm()">Fermer</button>
+  </form>
+  } }
+</div>

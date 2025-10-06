@@ -1,123 +1,97 @@
 package com.plateforme.kanban.controller;
 
-import java.time.Instant;
-import java.util.Map;
-import java.util.Optional;
 import com.plateforme.kanban.model.List;
 import com.plateforme.kanban.model.User;
-import com.plateforme.kanban.model.UserList;
-import com.plateforme.kanban.model.UserListRole;
-
+import com.plateforme.kanban.model.UserBoardRole;
+import com.plateforme.kanban.repository.BoardRepository;
+import com.plateforme.kanban.repository.ListRepository;
+import com.plateforme.kanban.repository.UserBoardRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.plateforme.kanban.repository.ListRepository;
-import com.plateforme.kanban.repository.UserListRepository;
+import java.time.Instant;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/boards/{boardId}/lists")
 public class ListController {
 
-    private ListRepository listRepository;
-    private UserListRepository userListRepository;
+    private final ListRepository listRepository;
+    private final BoardRepository boardRepository;
+    private final UserBoardRepository userBoardRepository;
 
-    public ListController(ListRepository listRepository, UserListRepository userListRepository) {
+    public ListController(ListRepository listRepository, BoardRepository boardRepository, UserBoardRepository userBoardRepository) {
         this.listRepository = listRepository;
-        this.userListRepository = userListRepository;
+        this.boardRepository = boardRepository;
+        this.userBoardRepository = userBoardRepository;
     }
 
-    @GetMapping("/list")
-    public List get(@RequestBody Map<String, String> payload) {
-        Long id = Long.parseLong(payload.get("id"));
-        String name = payload.get("name");
-        Long userId = Long.parseLong(payload.get("user_id"));
-        Optional<List> list = listRepository.findCustom(id, name, userId);
-        return list.orElse(null);
-    }
-
-    @GetMapping("/list/{id}")
-    public ResponseEntity<List> getOne(@PathVariable Long id) {
-        Optional<List> list = listRepository.findById(id);
-
-        if (list.isPresent()) {
-            return ResponseEntity.ok(list.get());
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @PostMapping("/list")
-    public List create(@RequestBody List list, @AuthenticationPrincipal User currentUser) {
+    @PostMapping
+    public ResponseEntity<List> createList(@PathVariable Long boardId, @RequestBody List list, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
-            throw new IllegalStateException("User must be authenticated to create a list.");
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
-        // Set the authenticated user as the owner
-        list.setUser(currentUser);
-        list.setCreatedDate(Instant.now());
-        List newList = listRepository.save(list);
-
-        // Create the link in UserList table
-        UserList userList = new UserList();
-        userList.setUser(currentUser);
-        userList.setList(newList);
-        userList.setRole(UserListRole.OWNER);
-        userListRepository.save(userList);
-
-        return newList;
+        return userBoardRepository.findByUser_IdAndBoard_Id(currentUser.getId(), boardId)
+                .filter(ub -> ub.getRole() == UserBoardRole.ADMIN || ub.getRole() == UserBoardRole.MEMBER)
+                .flatMap(ub -> boardRepository.findById(boardId))
+                .map(board -> {
+                    list.setBoard(board);
+                    list.setCreatedDate(Instant.now());
+                    List newList = listRepository.save(list);
+                    return new ResponseEntity<>(newList, HttpStatus.CREATED);
+                })
+                .orElse(new ResponseEntity<>(HttpStatus.FORBIDDEN));
     }
 
-    @DeleteMapping("/list/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id, @AuthenticationPrincipal User currentUser) {
+    @GetMapping("/{listId}")
+    public ResponseEntity<List> getList(@PathVariable Long boardId, @PathVariable Long listId, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
-            throw new IllegalStateException("User must be authenticated to create a list.");
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
-        Optional<List> listOptional = listRepository.findById(id);
-        if (listOptional.isPresent()) {
-            // Delete all related entries in UserList first
-            userListRepository.deleteByListId(id);
-            // Then delete the list
-            listRepository.deleteById(id);
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return userBoardRepository.findByUser_IdAndBoard_Id(currentUser.getId(), boardId)
+                .flatMap(ub -> listRepository.findById(listId))
+                .filter(list -> list.getBoard().getId().equals(boardId))
+                .map(list -> new ResponseEntity<>(list, HttpStatus.OK))
+                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @PutMapping("/list/{id}")
-    public ResponseEntity<List> update(@PathVariable Long id, @RequestBody Map<String, String> payload,
-            @AuthenticationPrincipal User currentUser) {
+    @PutMapping("/{listId}")
+    public ResponseEntity<List> updateList(@PathVariable Long boardId, @PathVariable Long listId, @RequestBody List listDetails, @AuthenticationPrincipal User currentUser) {
         if (currentUser == null) {
-            return ResponseEntity.status(403).build();
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
-        Optional<List> listOptional = listRepository.findById(id);
-        if (listOptional.isEmpty()) {
-            return ResponseEntity.notFound().build();
+        return userBoardRepository.findByUser_IdAndBoard_Id(currentUser.getId(), boardId)
+                .filter(ub -> ub.getRole() == UserBoardRole.ADMIN || ub.getRole() == UserBoardRole.MEMBER)
+                .flatMap(ub -> listRepository.findById(listId))
+                .filter(list -> list.getBoard().getId().equals(boardId))
+                .map(list -> {
+                    list.setName(listDetails.getName());
+                    list.setDescription(listDetails.getDescription());
+                    list.setUpdatedDate(Instant.now());
+                    List updatedList = listRepository.save(list);
+                    return new ResponseEntity<>(updatedList, HttpStatus.OK);
+                })
+                .orElse(new ResponseEntity<>(HttpStatus.FORBIDDEN));
+    }
+
+    @DeleteMapping("/{listId}")
+    public ResponseEntity<HttpStatus> deleteList(@PathVariable Long boardId, @PathVariable Long listId, @AuthenticationPrincipal User currentUser) {
+        if (currentUser == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
-        List list = listOptional.get();
-        // Vérifie si l'utilisateur authentifié est bien le propriétaire de la liste
-        if (!list.getUser().getId().equals(currentUser.getId())) {
-            return ResponseEntity.status(403).build(); // Interdit
-        }
-
-        String newName = payload.get("name");
-        if (newName != null && !newName.isEmpty()) {
-            list.setName(newName);
-            List updatedList = listRepository.save(list);
-            return ResponseEntity.ok(updatedList);
-        } else {
-            return ResponseEntity.badRequest().build();
-        }
+        return userBoardRepository.findByUser_IdAndBoard_Id(currentUser.getId(), boardId)
+                .filter(ub -> ub.getRole() == UserBoardRole.ADMIN) // Only admins can delete lists
+                .flatMap(ub -> listRepository.findById(listId))
+                .filter(list -> list.getBoard().getId().equals(boardId))
+                .map(list -> {
+                    listRepository.delete(list);
+                    return new ResponseEntity<HttpStatus>(HttpStatus.NO_CONTENT);
+                })
+                .orElse(new ResponseEntity<>(HttpStatus.FORBIDDEN));
     }
 }
