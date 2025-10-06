@@ -9,8 +9,8 @@ export class ListService {
   private apiUrl = 'http://localhost:8080/api/v1';
   private http = inject(HttpClient);
   private token: string | null = null;
-  private listsSubjet = new BehaviorSubject<any[]>([]);
-  lists$ = this.listsSubjet.asObservable;
+  private listsSubject = new BehaviorSubject<any[]>([]);
+  lists$ = this.listsSubject.asObservable();
 
   constructor() {
     if (typeof window !== 'undefined') {
@@ -34,7 +34,33 @@ export class ListService {
     this.http
       .get<any[]>(`${this.apiUrl}/boards/${boardId}/lists/${listId}`, { headers })
       .subscribe((list) => {
-        this.listsSubjet.next(list);
+        this.listsSubject.next(list);
       });
+  }
+
+  addList(list: any) {
+    const headers = { Authorization: `Bearer ${this.token}` };
+    this.http.post<any>(`${this.apiUrl}/lists`, list, { headers }).subscribe((newList) => {
+      const currentLists = this.listsSubject.getValue();
+      this.listsSubject.next([...currentLists, newList]);
+    });
+  }
+
+  deleteList(listId: number) {
+    const headers = { Authorization: `Bearer ${this.token}` };
+    this.http.delete(`${this.apiUrl}/lists/${listId}`, { headers }).subscribe(() => {
+      const currentLists = this.listsSubject.getValue();
+      this.listsSubject.next(currentLists.filter((list) => list.id !== listId));
+    });
+  }
+
+  updateList(list: any) {
+    const headers = { Authorization: `Bearer ${this.token}` };
+    this.http.put<any>(`${this.apiUrl}/lists/${list.id}`, list, { headers }).subscribe((updatedList) => {
+      const currentLists = this.listsSubject.getValue();
+      const index = currentLists.findIndex((l) => l.id === list.id);
+      currentLists[index] = updatedList;
+      this.listsSubject.next([...currentLists]);
+    });
   }
 }

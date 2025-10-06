@@ -1,4 +1,4 @@
-import { Component, inject, Input } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ListService } from '../../../_services/list/list.service';
 
@@ -10,6 +10,7 @@ import { ListService } from '../../../_services/list/list.service';
 })
 export class ListFormComponent {
   @Input() id!: number;
+  @Output() listCreated = new EventEmitter<any>();
   private listService = inject(ListService);
   public showForm: boolean = false;
   name = '';
@@ -22,6 +23,8 @@ export class ListFormComponent {
   onSubmit() {
     this.listService.create(this.id, this.name, this.description).subscribe({
       next: (resp) => {
+        this.listCreated.emit(resp);
+        this.toggleForm(); 
         console.log(resp);
       },
     });

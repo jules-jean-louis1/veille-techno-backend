@@ -18,7 +18,6 @@ export class Board implements OnInit {
   private boardService = inject(BoardService);
   private route = inject(ActivatedRoute);
   
-  // boards$ est la seule variable dont nous avons besoin
   public boards$: Observable<any[]> | undefined;
   id = 0;
 
@@ -27,10 +26,27 @@ export class Board implements OnInit {
       this.id = +params['id'];
     });
     
-    // On initialise boards$
     this.boards$ = this.boardService.boards$;
     
-    // On déclenche la récupération des données
     this.boardService.get(undefined, this.id);
+  }
+
+  addListToBoard(newList: any) {
+    this.boards$?.subscribe((boards) => {
+      const updatedBoards = boards.map((board) => {
+        if (board.id === this.id) {
+          return {
+            ...board,
+            lists: [...board.lists, newList],
+          };
+        }
+        return board;
+      });
+
+      this.boards$ = new Observable((observer) => {
+        observer.next(updatedBoards);
+        observer.complete();
+      });
+    });
   }
 }

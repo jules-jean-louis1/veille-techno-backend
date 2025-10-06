@@ -1,7 +1,9 @@
-<div>
-  <p>{{ list.name }}</p>
-  <app-task-form [listId]="list.id" (taskCreated)="addTaskToList($event)"></app-task-form>
-  <div *ngFor="let task of tasks; trackBy: trackByTaskId">
-    <app-task-card [task]="task" (taskDeleted)="deleteTaskFromList($event)"></app-task-card>
-  </div>
+<div class="list-container">
+    <div class="list-header">
+        <p>{{ list.name }}</p>
+    </div>
+    <app-task-form [listId]="list.id" (taskCreated)="addTaskToList($event)"></app-task-form>
+    <div *ngFor="let task of tasks; trackBy: trackByTaskId">
+        <app-task-card [task]="task" (taskDeleted)="deleteTaskFromList($event)" (taskUpdated)="updateTaskInList($event)"></app-task-card>
+    </div>
 </div>

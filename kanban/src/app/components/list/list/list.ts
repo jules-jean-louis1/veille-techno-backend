@@ -40,4 +40,12 @@ export class ListComponent {
   deleteTaskFromList(taskId: any) {
     this.tasks = this.tasks.filter((task) => task.id !== taskId);
   }
+
+  updateTaskInList(updatedTask: any) {
+    const index = this.tasks.findIndex((task) => task.id === updatedTask.id);
+    if (index !== -1) {
+      this.tasks[index] = updatedTask;
+      this.tasks = [...this.tasks];
+    }
+  }
 }
